@@ -152,8 +152,6 @@ function runSync(spreadSheetId, accessToken, artists, playlistId, logSheetName, 
       while (trackIndex < 2) {
         trackIndex++;
         if (artistTopTracks[trackIndex]) {
-          Logger.log(trackIndex);
-          Logger.log(levenshtein_distance(artistTopTracks[trackIndex]['artists'][0]['name'].toLowerCase(), artistName));
           if(levenshtein_distance(artistTopTracks[trackIndex]['artists'][0]['name'].toLowerCase(), artistName) <= 2){
             topTracks = topTracks.concat(artistTopTracks[trackIndex]);
           } else {
