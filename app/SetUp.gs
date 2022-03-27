@@ -41,6 +41,8 @@ function onOpen( ){
         .addItem('Reset All Playlist', 'resetTheAllPlaylist')
         .addSeparator()
         .addItem('Reset Playlists', 'resetPlaylists'))
+    .addSeparator()
+    .addItem('Scrape', 'scrape')
     .addToUi();
 }
 
