@@ -43,6 +43,7 @@ function onOpen( ){
         .addItem('Reset Playlists', 'resetPlaylists'))
     .addSeparator()
     .addItem('Scrape', 'scrape')
+    .addItem('Remove Duplicates', 'removeDuplicates')
     .addToUi();
 }
 
