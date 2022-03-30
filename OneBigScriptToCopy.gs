@@ -969,15 +969,16 @@ function getTopTracks(accessToken,artists){
 }
 
 function getTopTracksURIs(topTracks){
-  var rangeArray = [];
+  var topTracksURIs = [];
   topTracks.forEach(function (track) {
-    rangeArray = rangeArray.concat("spotify%3Atrack%3A" + track.id + "%2C");
+    topTracksURIs = topTracksURIs.concat("spotify%3Atrack%3A" + track.id + "%2C");
   });
-  return rangeArray;
+  return topTracksURIs;
 }
 
 function syncTracks(accessToken, playlistID, rangeArray){
     Logger.log("Playlist Editing Starting");
+
     var size = 30;
     var arrayOfArrays = [];
     for (var i = 0; i < rangeArray.length; i+=size) {
@@ -1004,7 +1005,6 @@ function syncTracks(accessToken, playlistID, rangeArray){
           headers: { "Authorization": "Bearer " + accessToken },
           payload: JSON.stringify(payload)
         };
-
         getJsonResult(url, params);
       }
        else {
@@ -1019,7 +1019,6 @@ function syncTracks(accessToken, playlistID, rangeArray){
           method: "POST",
           headers: { "Authorization": "Bearer " + accessToken },
         };
-
         getJsonResult(url, params);
       }
     }
