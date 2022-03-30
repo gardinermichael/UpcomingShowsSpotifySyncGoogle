@@ -606,6 +606,7 @@ function getArtistTopTracks(accessToken,artistID){
     };
 
     var data = getJsonResult(url, params);
+    Utilities.sleep(100);
     return data['tracks'];
 }
 
@@ -618,6 +619,7 @@ function getArtistName(accessToken,artistID){
     };
 
     var data = getJsonResult(url, params);
+    Utilities.sleep(100);
     return data['name'];
 }
 
@@ -641,6 +643,7 @@ function getArtistID(accessToken,artistName){
       artists = artists.concat(data);
     }
     while (artists.length < data.total && killswitch < 1);
+    Utilities.sleep(100);
     return (artists[0]['artists']['items'].length ? artists[0]['artists']['items'][0]['id'] : false);
 }
 
@@ -1008,6 +1011,7 @@ function syncTracks(accessToken, playlistID, rangeArray){
           payload: JSON.stringify(payload)
         };
         getJsonResult(url, params);
+        Utilities.sleep(100);
       }
        else {
         var orderedTracks = "";
@@ -1022,6 +1026,7 @@ function syncTracks(accessToken, playlistID, rangeArray){
           headers: { "Authorization": "Bearer " + accessToken },
         };
         getJsonResult(url, params);
+        Utilities.sleep(100);
       }
     }
     Logger.log("Playlist Editing Complete");
