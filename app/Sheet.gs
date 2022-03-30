@@ -10,7 +10,7 @@ function iterateThroughRows(timePeriod="All") {
 
   var todayDate = Utilities.formatDate(new Date(), "EST", "yyyy-MM-dd"); 
 
-  returnArtists = []
+  var returnArtists = [];
 
   if (timePeriod == 'Upcoming') {
     data.forEach(function (row) {
