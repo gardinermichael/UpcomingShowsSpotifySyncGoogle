@@ -135,37 +135,7 @@ function resetTheAllPlaylist(){
 }
 
 function runSync(spreadSheetId, accessToken, artists, playlistId, logSheetName, currentSheetName){
-  var topTracks = [];
-
-  artists.forEach(function(value, index, array) {
-    var artistName = (value['idBackUp'] ? getArtistName(accessToken, value['idBackUp']).toLowerCase() : value['artist'].toLowerCase());
-    var artistID = (value['idBackUp'] ? value['idBackUp'] : getArtistID(accessToken, encodeURIComponent(value['artist'])));
-
-    if (artistID){
-      var artistTopTracks = getArtistTopTracks(accessToken,artistID);
-
-      var trackIndex = 1;
-      if(value['headliner']){
-        trackIndex = 0;
-      }
-
-      while (trackIndex < 2) {
-        trackIndex++;
-        if (artistTopTracks[trackIndex]) {
-          Logger.log(trackIndex);
-          Logger.log(levenshtein_distance(artistTopTracks[trackIndex]['artists'][0]['name'].toLowerCase(), artistName));
-          if(levenshtein_distance(artistTopTracks[trackIndex]['artists'][0]['name'].toLowerCase(), artistName) <= 2){
-            topTracks = topTracks.concat(artistTopTracks[trackIndex]);
-          } else {
-            artistTopTracks.splice(trackIndex);
-            trackIndex--;
-          }
-        } 
-      }
-    };
-  Logger.log("Artist no. " + index + ", " + topTracks.length + " total tracks loaded.")
-  });
-
+  var topTracks = getTopTracks(accessToken, artists);
   var savedSongs = getPlaylistSongs(accessToken, playlistId);
 
   Logger.log("Saved Songs: " + savedSongs.length);
@@ -174,28 +144,30 @@ function runSync(spreadSheetId, accessToken, artists, playlistId, logSheetName, 
 
   Logger.log("Added Songs: " + addedSongs.length);
 
-  for (var i = 0; i < addedSongs.length; i++) {
-    Logger.log("Adding \"%s\" by %s to saved songs...", addedSongs[i].name, addedSongs[i].artists[0].name);
+  // for (var i = 0; i < addedSongs.length; i++) {
+  //   Logger.log("Adding \"%s\" by %s to saved songs...", addedSongs[i].name, addedSongs[i].artists[0].name);
     
-    addSongToPlaylist(accessToken, addedSongs[i].uri, playlistId);
+  //   addSongToPlaylist(accessToken, addedSongs[i].uri, playlistId);
 
-    Utilities.sleep(5000);
-  }
+  //   Utilities.sleep(5000);
+  // }
 
   var removedSongs = savedSongs.filter(s => !topTracks.map(x => x.id).includes(s.track.id));
 
   Logger.log("Removed Songs: " + removedSongs.length);
 
-  for (var i = 0; i < removedSongs.length; i++) {
-    Logger.log("Removing \"%s\" by %s from saved songs...", removedSongs[i].track.name, removedSongs[i].track.artists[0].name);
+  // for (var i = 0; i < removedSongs.length; i++) {
+  //   Logger.log("Removing \"%s\" by %s from saved songs...", removedSongs[i].track.name, removedSongs[i].track.artists[0].name);
     
-    removeSongFromPlaylist(accessToken, removedSongs[i].track.uri, playlistId);
+  //   removeSongFromPlaylist(accessToken, removedSongs[i].track.uri, playlistId);
 
-    // This is a nifty idea but I'm deleting it for the moment. If you want it, add the savedArchivePlaylistId back in as a parameter function, save the playlist id as a env variable and uncomment this.
-    // addSongToPlaylist(accessToken, removedSongs[i].track.uri, savedArchivePlaylistId);
+  //   // This is a nifty idea but I'm deleting it for the moment. If you want it, add the savedArchivePlaylistId back in as a parameter function, save the playlist id as a env variable and uncomment this.
+  //   // addSongToPlaylist(accessToken, removedSongs[i].track.uri, savedArchivePlaylistId);
     
-    Utilities.sleep(5000);
-  }
+  //   Utilities.sleep(5000);
+  // }
+
+  syncTracks(accessToken,playlistId,getTopTracksURIs(topTracks));
 
   if (addedSongs.length > 0) {
     Logger.log("Adding added songs to sheet...");
@@ -232,4 +204,92 @@ function resetPlaylist(spreadSheetId, accessToken, playlistId, currentSheetName)
   var spreadSheet = SpreadsheetApp.openById(spreadSheetId);
   var currentSheet = spreadSheet.getSheetByName(currentSheetName);
   currentSheet.clearContents();
+}
+
+function getTopTracks(accessToken,artists){
+  var topTracks = [];
+  artists.forEach(function(value, index, array) {
+    var artistName = (value['idBackUp'] ? getArtistName(accessToken, value['idBackUp']).toLowerCase() : value['artist'].toLowerCase());
+    var artistID = (value['idBackUp'] ? value['idBackUp'] : getArtistID(accessToken, encodeURIComponent(value['artist'])));
+
+    if (artistID){
+      var artistTopTracks = getArtistTopTracks(accessToken,artistID);
+
+      var trackIndex = 1;
+      if(value['headliner']){
+        trackIndex = 0;
+      }
+
+      while (trackIndex < 2) {
+        trackIndex++;
+        if (artistTopTracks[trackIndex]) {
+          if(levenshtein_distance(artistTopTracks[trackIndex]['artists'][0]['name'].toLowerCase(), artistName) <= 2){
+            topTracks = topTracks.concat(artistTopTracks[trackIndex]);
+          } else {
+            artistTopTracks.splice(trackIndex);
+            trackIndex--;
+          }
+        } 
+      }
+  };
+  Logger.log("Artist no. " + index + ", " + topTracks.length + " total tracks loaded.")
+  });
+  return topTracks;
+}
+
+function getTopTracksURIs(topTracks){
+  var topTracksURIs = [];
+  topTracks.forEach(function (track) {
+    topTracksURIs = topTracksURIs.concat("spotify%3Atrack%3A" + track.id + "%2C");
+  });
+  return topTracksURIs;
+}
+
+function syncTracks(accessToken, playlistID, rangeArray){
+    Logger.log("Playlist Editing Starting");
+
+    var size = 30;
+    var arrayOfArrays = [];
+    for (var i = 0; i < rangeArray.length; i+=size) {
+        arrayOfArrays.push(rangeArray.slice(i,i+size));
+    }
+
+    for (var p = 0; p < arrayOfArrays.length; p++) {
+      if ( p == 0) {
+        var payload = {
+          range_start: 1,
+          insert_before: 1,
+          range_length: 30,
+        };
+
+        var orderedTracks = "";
+        arrayOfArrays[p].forEach(function (track) {
+            orderedTracks = orderedTracks.concat(track);
+        });
+
+        var url = "https://api.spotify.com/v1/playlists/" + playlistID + "/tracks?uris=" +  orderedTracks;        
+        var params =
+        {
+          method: "PUT",
+          headers: { "Authorization": "Bearer " + accessToken },
+          payload: JSON.stringify(payload)
+        };
+        getJsonResult(url, params);
+      }
+       else {
+        var orderedTracks = "";
+        arrayOfArrays[p].forEach(function (track) {
+            orderedTracks = orderedTracks.concat(track);
+        });
+
+        var url = "https://api.spotify.com/v1/playlists/" + playlistID + "/tracks?uris=" +  orderedTracks;
+        var params =
+        {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + accessToken },
+        };
+        getJsonResult(url, params);
+      }
+    }
+    Logger.log("Playlist Editing Complete");
 }
