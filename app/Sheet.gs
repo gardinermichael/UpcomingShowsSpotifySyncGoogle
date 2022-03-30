@@ -16,7 +16,7 @@ function iterateThroughRows(timePeriod="All") {
     data.forEach(function (row) {
       if(row[1] && (row[2].length > 0 || row[5].length > 0)){
         if (row[4].length == 0.0){
-          showDate = Utilities.formatDate(row[1], "EST", "yyyy-MM-dd");
+          showDate = Utilities.formatDate(row[1], "GMT", "yyyy-MM-dd");
           if(showDate >= todayDate) {
             artistInfo = {
                 artist: row[2],
@@ -33,7 +33,7 @@ function iterateThroughRows(timePeriod="All") {
     data.forEach(function (row) {
       if(row[1] && (row[2].length > 0 || row[5].length > 0)){
         if (row[4].length == 0.0){
-          showDate = Utilities.formatDate(row[1], "EST", "yyyy-MM-dd");
+          showDate = Utilities.formatDate(row[1], "GMT", "yyyy-MM-dd");
           if(showDate < todayDate) {
             artistInfo = {
                 artist: row[2],

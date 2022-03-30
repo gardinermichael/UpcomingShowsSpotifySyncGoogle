@@ -5,7 +5,7 @@
  * @return The index
  * @customfunction
  * 
- * This is here because I think it's neat and I want to bookmark it. This a direct copy of: https://github.com/nyanlynntherazi/ZLOOKUP/blob/master/zlookup.gs
+ * This is here because I think it's neat and I want to bookmark it. This is a direct copy of: https://github.com/nyanlynntherazi/ZLOOKUP/blob/master/zlookup.gs
  * 
  */
 
