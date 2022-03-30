@@ -275,6 +275,7 @@ function syncTracks(accessToken, playlistID, rangeArray){
           payload: JSON.stringify(payload)
         };
         getJsonResult(url, params);
+        Utilities.sleep(100);
       }
        else {
         var orderedTracks = "";
@@ -289,6 +290,7 @@ function syncTracks(accessToken, playlistID, rangeArray){
           headers: { "Authorization": "Bearer " + accessToken },
         };
         getJsonResult(url, params);
+        Utilities.sleep(100);
       }
     }
     Logger.log("Playlist Editing Complete");
